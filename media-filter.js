@@ -2,14 +2,20 @@ const bunyan = require('bunyan');
 const axios = require('axios').default;
 const fs = require('fs');
 
-let infoLogs = fs.readFileSync('./logs/media-filter.info')
+let pageOffset = 0;
+if (fs.existsSync('./logs/media-filter.info')) {
+  let infoLogs = fs.readFileSync('./logs/media-filter.info')
   .toString()
   .split(/\r?\n/gi)
   .filter(s => s.length)
   .map(line => JSON.parse(line))
   .reverse();
 
-let pageOffset = (infoLogs.find(x => x.pageNum != null) || {}).pageNum;
+  let lastSuccessLog = infoLogs.find(x => x.pageNum != null);
+  if (lastSuccessLog) {
+    pageOffset = lastSuccessLog.pageNum;
+  }
+}
 
 const log = bunyan.createLogger({
   name: 'media-filter',
@@ -41,7 +47,7 @@ const log = bunyan.createLogger({
   // If pageOffset is not defined, then start at (0+1) because WordPress page
   // indices starts at 1). Otherwise start at (pageOffset+1) to start at the
   // next page.
-  let i = (pageOffset || 0) + 1;
+  let i = pageOffset + 1;
   let totalCount = 0;
   while (true) {
     console.time('loop');
