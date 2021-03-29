@@ -1,5 +1,6 @@
 const bunyan = require('bunyan');
 const axios = require('axios').default;
+const fs = require('fs');
 
 let infoLogs = fs.readFileSync('./logs/media-filter.info')
   .toString()
